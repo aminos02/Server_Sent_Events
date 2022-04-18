@@ -13,7 +13,8 @@ app.get('/status', (request, response) => response.json({clients: clients.length
 const PORT = 3001;
 
 let clients = [];
-let facts = [];
+// let facts = [];
+var isBanner=true;
 
 function eventsHandler(request, response, next) {
     const headers = {
@@ -23,7 +24,7 @@ function eventsHandler(request, response, next) {
     };
     response.writeHead(200, headers);
   
-    const data = `data: ${JSON.stringify(facts)}\n\n`;
+    const data = `data: ${JSON.stringify(isBanner)}\n\n`;
   
     response.write(data);
   
@@ -42,19 +43,30 @@ function eventsHandler(request, response, next) {
     });
   }
   function sendEventsToAll(newFact) {
-    clients.forEach(client => client.response.write(`data: ${JSON.stringify(newFact)}\n\n`))
+    // clients.forEach(client => client.response.write(`data: ${JSON.stringify(newFact)}\n\n`))
+    if (clients.length!==0)clients[clients.length-1].response.write(`data: ${JSON.stringify(newFact)}\n\n`)
   }
   var i=0;
   async function addFact(request, respsonse, next) {
     const newFact = request.body;
     console.log(request.body)
-    facts.push(newFact);
+    // facts.push(newFact);
     respsonse.json(newFact)
     return sendEventsToAll(i++);
   }
   
-  
+  function sendBanner(newFact) {
+    // clients.forEach(client => client.response.write(`data: ${JSON.stringify(newFact)}\n\n`))
+    if (clients.length!==0)clients[clients.length-1].response.write(`data: ${JSON.stringify(newFact)}\n\n`)
+  }
+
   app.post('/fact', addFact);
+  app.post('/banner',(req,res)=>{
+    isBanner=req.body.banner
+    console.log(isBanner)
+    sendBanner(isBanner)
+    res.send({a:"ok"})
+  })
   app.get('/events', eventsHandler);
 
 
